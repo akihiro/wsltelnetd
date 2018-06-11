@@ -69,7 +69,7 @@ static int binding(const char* node, const char* service) {
 	int sfd;
 	struct addrinfo *rp = NULL;
 	for (rp = res; rp != NULL; rp = rp->ai_next) {
-		sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+		sfd = socket(rp->ai_family, rp->ai_socktype || SOCK_CLOEXEC, rp->ai_protocol);
 		if (sfd == -1)
 			continue;
 
