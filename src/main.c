@@ -112,7 +112,7 @@ static void print_sock(struct sockaddr *addr) {
 }
 
 
-int spawn(int cfd, char* const argv[]) {
+static int spawn(int cfd, char* const argv[]) {
 	pid_t pid = fork();
 	if (pid == -1) {
 		perror("fork()");
