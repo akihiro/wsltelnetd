@@ -21,12 +21,22 @@ int main (int argc, char* const *argv) {
 		usage(argv[0]);
 		return 1;
 	}
+	++argv;
 
-	int sfd = binding(argv[1], argv[2]);
+	if (strncmp("-d", argv[0], 3) == 0) {
+		if (daemon(0, 0) == -1) {
+			perror("daemon()");
+			return -1;
+		}
+		++argv;
+	}
+
+	int sfd = binding(argv[0], argv[1]);
 	if (sfd < 0) {
 		fprintf(stderr, "binding() faild\n");
 		return -1;
 	}
+	argv += 2;
 
 	if (listen(sfd, recv_conn) == -1) {
 		perror("listen(): ");
@@ -36,7 +46,7 @@ int main (int argc, char* const *argv) {
 
 	for(;;) {
 		int cfd = accept(sfd, NULL, 0);
-		if (spawn(cfd, argv+3) != 0) {
+		if (spawn(cfd, argv) != 0) {
 			fprintf(stderr, "spawn()");
 			return -1;
 		}
@@ -48,7 +58,7 @@ int main (int argc, char* const *argv) {
 
 
 static void usage(const char* prog) {
-	fprintf(stderr, "%s addr service program [program_args...]\n", prog);
+	fprintf(stderr, "%s [-d] addr service program [program_args...]\n", prog);
 }
 
 
