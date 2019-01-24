@@ -6,6 +6,7 @@
 #include <netdb.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/wait.h>
 #include <netdb.h>
 #include <arpa/inet.h>
 
@@ -51,6 +52,8 @@ int main (int argc, char* const *argv) {
 			return -1;
 		}
 		close(cfd);
+		int status;
+		while (waitpid(-1, &status, WNOHANG) > 0);
 	}
 
 	return 0;
