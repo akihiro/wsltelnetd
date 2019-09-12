@@ -16,6 +16,7 @@ static void usage(const char*);
 static void print_sock(struct sockaddr *addr);
 static int binding(const char*, const char*);
 static int spawn(int, char* const[]);
+static void sigreap(int signo);
 
 int main (int argc, char* const *argv) {
 	if (argc < 4) {
@@ -45,6 +46,12 @@ int main (int argc, char* const *argv) {
 		return -1;
 	}
 
+	if (sigaction(SIGCHLD, &(struct sigaction){
+		.sa_handler = sigreap,
+		.sa_flags = SA_NOCLDSTOP},
+		NULL) < 0)
+		return 2;
+
 	for(;;) {
 		int cfd = accept(sfd, NULL, 0);
 		if (spawn(cfd, argv) != 0) {
@@ -52,8 +59,6 @@ int main (int argc, char* const *argv) {
 			return -1;
 		}
 		close(cfd);
-		int status;
-		while (waitpid(-1, &status, WNOHANG) > 0);
 	}
 
 	return 0;
@@ -144,4 +149,8 @@ static int spawn(int cfd, char* const argv[]) {
 		perror("execv()");
 	}
 	return 1;
+}
+
+static void sigreap(int signo) {
+	while (waitpid(-1, NULL, WNOHANG) > 0);
 }
